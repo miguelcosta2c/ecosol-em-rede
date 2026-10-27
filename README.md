@@ -1,32 +1,116 @@
-# React + TypeScript + Vite
+# 🌱 Ecosol em Rede
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Site desenvolvido para apresentar a Feira de Economia Solidária de Itaipu, em Niterói (RJ), valorizando os pequenos empreendedores, seus produtos e suas histórias.
 
-Currently, two official plugins are available:
+O projeto busca destacar a importância da economia solidária, da cooperação, do comércio local e da autonomia dos trabalhadores.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🎯 Objetivo
 
-## React Compiler
+Documentar e divulgar as experiências observadas durante uma visita à Feira de Economia Solidária, conectando tecnologia, educação e valorização da economia local.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Funcionalidades
 
-## Expanding the Oxlint configuration
+- Apresentação da feira e do projeto.
+- Catálogo de expositores e seus produtos.
+- Histórias e experiências dos participantes.
+- Busca por produtos e expositores.
+- Filtros por categoria.
+- Detalhes dos expositores em janelas interativas.
+- Links para redes sociais.
+- Layout responsivo para diferentes tamanhos de tela.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## 🛠️ Tecnologias
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+- [React](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vite.dev/)
+- CSS
+
+## 🚀 Como executar localmente
+
+### Pré-requisitos
+
+- [Node.js](https://nodejs.org/) instalado.
+- npm instalado.
+
+### Instalação
+
+Clone o repositório:
+
+```bash
+git clone https://github.com/miguelcosta2c/ecosol-em-rede
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Entre na pasta do projeto:
+
+```bash
+cd ecosol-em-rede
+```
+
+Instale as dependências:
+
+```bash
+npm install
+```
+
+Inicie o servidor de desenvolvimento:
+
+```bash
+npm run dev
+```
+
+Abra no navegador o endereço exibido no terminal.
+
+## 🏗️ Build de produção
+
+Para gerar a versão de produção:
+
+```bash
+npm run build
+```
+
+Para testar a versão compilada localmente:
+
+```bash
+npm run preview
+```
+
+## 📁 Estrutura do projeto
+
+```text
+ecosol-em-rede/
+├── public/
+│   └── images/
+├── src/
+│   ├── App.tsx
+│   ├── App.css
+│   ├── index.css
+│   └── main.tsx
+├── index.html
+├── package.json
+├── package-lock.json
+└── vite.config.ts
+```
+
+_Estrutura ilustrativa; os arquivos podem variar conforme a configuração atual do projeto._
+
+## 🌎 Deploy
+
+O projeto pode ser publicado na [Vercel](https://vercel.com/), conectando o repositório do GitHub.
+
+Configuração padrão para projetos Vite:
+
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+
+## 📚 Contexto acadêmico
+
+Projeto desenvolvido no contexto do curso Técnico em Informática do Instituto Federal do Rio de Janeiro (IFRJ), Campus Niterói, como parte da proposta ECOSOL EM REDE.
+
+## 🤝 Contribuições
+
+Este projeto tem finalidade acadêmica e educativa. Sugestões e melhorias são bem-vindas.
+
+## 📄 Licença
+
+Nenhuma licença foi definida até o momento. Todos os direitos sobre o código e os materiais permanecem com seus respectivos autores, até que uma licença seja escolhida.
