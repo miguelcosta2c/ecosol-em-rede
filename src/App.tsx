@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 type Expositor = {
@@ -73,12 +73,32 @@ const expositores: Expositor[] = [
 
 const categorias = ["Todos", "Alimentos", "Artesanato", "Outros"];
 
+const valores = [
+  {
+    icone: "♡",
+    titulo: "Valorização",
+    texto: "Histórias e talentos locais",
+  },
+  {
+    icone: "⌘",
+    titulo: "Cooperação",
+    texto: "Uma rede feita em conjunto",
+  },
+  {
+    icone: "♧",
+    titulo: "Sustentabilidade",
+    texto: "Consumo mais consciente",
+  },
+];
+
 function App() {
   const [busca, setBusca] = useState("");
   const [categoriaAtiva, setCategoriaAtiva] = useState("Todos");
   const [expositorSelecionado, setExpositorSelecionado] =
     useState<Expositor | null>(null);
   const [menuAberto, setMenuAberto] = useState(false);
+  const [headerSolido, setHeaderSolido] = useState(false);
+  const [secaoAtiva, setSecaoAtiva] = useState("inicio");
 
   const expositoresFiltrados = useMemo(() => {
     const termo = busca.trim().toLocaleLowerCase("pt-BR");
@@ -102,11 +122,118 @@ function App() {
     });
   }, [busca, categoriaAtiva]);
 
+  useEffect(() => {
+    const aoRolar = () => setHeaderSolido(window.scrollY > 16);
+
+    aoRolar();
+    window.addEventListener("scroll", aoRolar, { passive: true });
+
+    return () => window.removeEventListener("scroll", aoRolar);
+  }, []);
+
+  useEffect(() => {
+    const ids = ["inicio", "expositores", "sobre", "visitar"];
+    const secoes = ids
+      .map((id) => document.getElementById(id))
+      .filter((secao): secao is HTMLElement => secao !== null);
+
+    if (secoes.length === 0) return;
+
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        entradas.forEach((entrada) => {
+          if (entrada.isIntersecting) setSecaoAtiva(entrada.target.id);
+        });
+      },
+      { rootMargin: "-40% 0px -55% 0px", threshold: 0 },
+    );
+
+    secoes.forEach((secao) => observador.observe(secao));
+    return () => observador.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const root = document.documentElement;
+    root.classList.add("reveal-enabled");
+
+    return () => root.classList.remove("reveal-enabled");
+  }, []);
+
+  useEffect(() => {
+    const elementos = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-reveal]:not(.is-visible)"),
+    );
+
+    const revelarTodos = () =>
+      elementos.forEach((elemento) => elemento.classList.add("is-visible"));
+
+    if (
+      !document.documentElement.classList.contains("reveal-enabled") ||
+      !("IntersectionObserver" in window)
+    ) {
+      revelarTodos();
+      return;
+    }
+
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        entradas.forEach((entrada) => {
+          if (!entrada.isIntersecting) return;
+          entrada.target.classList.add("is-visible");
+          observador.unobserve(entrada.target);
+        });
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+    );
+
+    elementos.forEach((elemento) => observador.observe(elemento));
+    return () => observador.disconnect();
+  }, [expositoresFiltrados]);
+
+  useEffect(() => {
+    if (!menuAberto) return;
+
+    const overflowAnterior = document.body.style.overflow;
+    const aoPressionarTecla = (evento: KeyboardEvent) => {
+      if (evento.key === "Escape") setMenuAberto(false);
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", aoPressionarTecla);
+
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      window.removeEventListener("keydown", aoPressionarTecla);
+    };
+  }, [menuAberto]);
+
+  useEffect(() => {
+    if (!expositorSelecionado) return;
+
+    const overflowAnterior = document.body.style.overflow;
+    const aoPressionarTecla = (evento: KeyboardEvent) => {
+      if (evento.key === "Escape") setExpositorSelecionado(null);
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", aoPressionarTecla);
+
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      window.removeEventListener("keydown", aoPressionarTecla);
+    };
+  }, [expositorSelecionado]);
+
+  const navLinkClass = (id: string) =>
+    `nav-link ${secaoAtiva === id ? "active" : ""}`;
+
   const fecharModal = () => setExpositorSelecionado(null);
 
   return (
     <div className="site-wrapper">
-      <header className="site-header">
+      <header className={`site-header ${headerSolido ? "is-scrolled" : ""}`}>
         <a
           className="brand"
           href="#inicio"
@@ -149,7 +276,7 @@ function App() {
         </a>
 
         <button
-          className="menu-toggle"
+          className={`menu-toggle ${menuAberto ? "is-open" : ""}`}
           type="button"
           aria-label={menuAberto ? "Fechar menu" : "Abrir menu"}
           aria-expanded={menuAberto}
@@ -161,13 +288,28 @@ function App() {
         </button>
 
         <nav className={`main-nav ${menuAberto ? "is-open" : ""}`}>
-          <a href="#inicio" onClick={() => setMenuAberto(false)}>
+          <a
+            className={navLinkClass("inicio")}
+            aria-current={secaoAtiva === "inicio" ? "true" : undefined}
+            href="#inicio"
+            onClick={() => setMenuAberto(false)}
+          >
             Início
           </a>
-          <a href="#expositores" onClick={() => setMenuAberto(false)}>
+          <a
+            className={navLinkClass("expositores")}
+            aria-current={secaoAtiva === "expositores" ? "true" : undefined}
+            href="#expositores"
+            onClick={() => setMenuAberto(false)}
+          >
             Expositores
           </a>
-          <a href="#sobre" onClick={() => setMenuAberto(false)}>
+          <a
+            className={navLinkClass("sobre")}
+            aria-current={secaoAtiva === "sobre" ? "true" : undefined}
+            href="#sobre"
+            onClick={() => setMenuAberto(false)}
+          >
             Sobre o projeto
           </a>
           <a
@@ -244,37 +386,43 @@ function App() {
 
             <span className="hero-decoration hero-decoration-one" />
             <span className="hero-decoration hero-decoration-two" />
+            <span className="hero-side-label">
+              FEIRA DE ITAIPU · NITERÓI
+            </span>
           </div>
         </section>
 
         <section className="values-strip" aria-label="Valores do projeto">
-          <div className="value-item">
-            <span className="value-icon">♡</span>
-            <span>
-              <strong>Valorização</strong>
-              <small>Histórias e talentos locais</small>
-            </span>
-          </div>
-          <div className="value-item">
-            <span className="value-icon">⌘</span>
-            <span>
-              <strong>Cooperação</strong>
-              <small>Uma rede feita em conjunto</small>
-            </span>
-          </div>
-          <div className="value-item">
-            <span className="value-icon">♧</span>
-            <span>
-              <strong>Sustentabilidade</strong>
-              <small>Consumo mais consciente</small>
-            </span>
+          <div className="values-track">
+            {[0, 1, 2].map((copia) => (
+              <div
+                className="values-group"
+                key={copia}
+                aria-hidden={copia > 0 ? "true" : undefined}
+              >
+                {valores.map((valor) => (
+                  <div className="value-item" key={valor.titulo}>
+                    <span className="value-icon" aria-hidden="true">
+                      {valor.icone}
+                    </span>
+                    <span>
+                      <strong>{valor.titulo}</strong>
+                      <small>{valor.texto}</small>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
         </section>
 
         <section className="catalog-section section-container" id="expositores">
-          <div className="section-heading">
+          <div className="section-heading" data-reveal>
             <div>
-              <span className="eyebrow">CONHEÇA A NOSSA REDE</span>
+              <span className="eyebrow">
+                <span className="eyebrow-index">01</span>
+                CONHEÇA A NOSSA REDE
+              </span>
               <h2>
                 Quem faz a feira <span>acontecer.</span>
               </h2>
@@ -350,7 +498,11 @@ function App() {
 
           <div className="exhibitors-grid">
             {expositoresFiltrados.map((expositor) => (
-              <article className="exhibitor-card" key={expositor.id}>
+              <article
+                className="exhibitor-card"
+                key={expositor.id}
+                data-reveal
+              >
                 <button
                   type="button"
                   className="card-image-button"
@@ -370,16 +522,21 @@ function App() {
                     <span aria-hidden="true">✳</span>
                     <small>Foto do expositor</small>
                   </span>
+                  <span className="card-index">
+                    {expositor.id.toString().padStart(2, "0")}
+                  </span>
                   {expositor.destaque && (
                     <span className="card-badge">Em destaque</span>
                   )}
+                  <span className="card-category-pill">
+                    {expositor.categoria}
+                  </span>
                   <span className="card-arrow" aria-hidden="true">
                     ↗
                   </span>
                 </button>
 
                 <div className="card-content">
-                  <span className="card-category">{expositor.categoria}</span>
                   <h3>{expositor.nome}</h3>
                   <p>{expositor.descricao}</p>
 
@@ -424,7 +581,7 @@ function App() {
 
         <section className="about-section" id="sobre">
           <div className="about-inner">
-            <div className="about-visual">
+            <div className="about-visual" data-reveal>
               <div className="about-image-wrap">
                 <img
                   src="/images/economia-solidaria.jpg"
@@ -439,8 +596,11 @@ function App() {
               </span>
             </div>
 
-            <div className="about-content">
-              <span className="eyebrow">MAIS DO QUE UMA FEIRA</span>
+            <div className="about-content" data-reveal>
+              <span className="eyebrow">
+                <span className="eyebrow-index">02</span>
+                MAIS DO QUE UMA FEIRA
+              </span>
               <h2>
                 Uma economia que coloca <span>as pessoas em primeiro lugar.</span>
               </h2>
@@ -475,9 +635,12 @@ function App() {
         </section>
 
         <section className="visit-section section-container" id="visitar">
-          <div className="visit-card">
+          <div className="visit-card" data-reveal>
             <div className="visit-content">
-              <span className="eyebrow">VENHA CONHECER</span>
+              <span className="eyebrow">
+                <span className="eyebrow-index">03</span>
+                VENHA CONHECER
+              </span>
               <h2>
                 A próxima história pode começar <span>na feira.</span>
               </h2>
@@ -587,6 +750,10 @@ function App() {
           </nav>
         </div>
 
+        <div className="footer-wordmark" aria-hidden="true">
+          ECOSOL <span>EM REDE</span>
+        </div>
+
         <div className="footer-bottom">
           <span>ECOSOL EM REDE · Projeto educacional</span>
           <span>Feito com propósito em Niterói, RJ.</span>
@@ -612,6 +779,7 @@ function App() {
               type="button"
               onClick={fecharModal}
               aria-label="Fechar detalhes"
+              autoFocus
             >
               ×
             </button>
